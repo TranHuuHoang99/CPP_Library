@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "*.tpp": "cpp",
+        "iostream": "cpp",
+        "exception": "cpp",
+        "array": "cpp",
+        "initializer_list": "cpp",
+        "utility": "cpp",
+        "ostream": "cpp"
+    }
+}
