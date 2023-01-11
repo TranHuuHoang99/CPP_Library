@@ -43,13 +43,17 @@ namespace Event {
                     this generic function is supposed to be defined before calling emit function below
                     and this must be happened first
             */
-            template<typename... T> void on(const char* eventName, void (*callback)(T...)) {
+            template<typename... T> uint8_t on(const char* eventName, void (*callback)(T...)) {
                 callbackReference<T...> = callback;
 
                 for(uint8_t i = 0; i < _eventRegister.size(); i++) {
                     if(_eventRegister[i].eventName == eventName) {
                         _eventRegister[i]._registry._register.push_back(reinterpret_cast<void*>(callbackReference<T...>));
-                        return;
+                        uint8_t eventID = 0;
+                        for(uint8_t j = 0; j < _eventRegister[i]._registry._register.size(); j++) {
+                            eventID++;
+                        }
+                        return eventID - 1;
                     }
                 }
 
@@ -57,6 +61,7 @@ namespace Event {
                 _events.eventName = eventName;
                 _events._registry._register.push_back(reinterpret_cast<void*>(callbackReference<T...>));
                 _eventRegister.push_back(_events);
+                return 0;
             }
 
             /*
@@ -72,6 +77,22 @@ namespace Event {
                             _callbackFunc = reinterpret_cast<void(*)(T...)>(_eventRegister[i]._registry._register[j]);
                             _callbackFunc(params...);
                         }
+                    }
+                }
+            }
+
+            void off(const char* eventName, uint8_t eventID) {
+                for(uint8_t i = 0; i < _eventRegister.size(); i++) {
+                    if(_eventRegister[i].eventName == eventName){
+                        _eventRegister[i]._registry._register.erase(_eventRegister[i]._registry._register.begin() + eventID);
+                    }
+                }
+            }
+
+            void dismiss(const char* eventName) {
+                for(uint8_t i = 0; i < _eventRegister.size(); i++) {
+                    if(_eventRegister[i].eventName == eventName) {
+                        _eventRegister.erase(_eventRegister.begin() + i);
                     }
                 }
             }
