@@ -16,7 +16,7 @@ int main(void) {
         cout <<"sdfa "<< name << endl;
     });
 
-    Event::EventEmitter::inst()->emit<const char*>("hoang", "dzasdf");
+    Event::EventEmitter::inst()->emit<const char*>("hoang", "dzasdf"); 
 
     return 0;
 }

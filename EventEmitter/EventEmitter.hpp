@@ -48,14 +48,14 @@ namespace Event {
 
                 for(uint8_t i = 0; i < _eventRegister.size(); i++) {
                     if(_eventRegister[i].eventName == eventName) {
-                        _eventRegister[i]._registry._register.push_back(&callbackReference<T...>);
+                        _eventRegister[i]._registry._register.push_back(reinterpret_cast<void*>(callbackReference<T...>));
                         return;
                     }
                 }
 
                 Events _events;
                 _events.eventName = eventName;
-                _events._registry._register.push_back(&callbackReference<T...>);
+                _events._registry._register.push_back(reinterpret_cast<void*>(callbackReference<T...>));
                 _eventRegister.push_back(_events);
             }
 
@@ -65,12 +65,12 @@ namespace Event {
                 @example void emit<const char*, float, int, uint8_t, char>()
             */
             template<typename... T> void emit(const char* eventName, T... params) {
-                void (**_callbackFunc)(T...);
+                void (*_callbackFunc)(T...);
                 for(uint8_t i = 0; i < _eventRegister.size(); i++) {
                     if(_eventRegister[i].eventName == eventName) {
                         for(uint8_t j = 0; j < _eventRegister[i]._registry._register.size(); j++) {
-                            _callbackFunc = static_cast<void(**)(T...)>(_eventRegister[i]._registry._register[j]);
-                            (*_callbackFunc)(params...);
+                            _callbackFunc = reinterpret_cast<void(*)(T...)>(_eventRegister[i]._registry._register[j]);
+                            _callbackFunc(params...);
                         }
                     }
                 }
