@@ -7,8 +7,6 @@
 
 using namespace std;
 
-template<typename... T> void (*callbackReference)(T...);
-
 namespace Event {
     class EventEmitter {
         public:
@@ -43,60 +41,21 @@ namespace Event {
                     this generic function is supposed to be defined before calling emit function below
                     and this must be happened first
             */
-            template<typename... T> uint8_t on(const char* eventName, void (*callback)(T...)) {
-                callbackReference<T...> = callback;
-
-                for(uint8_t i = 0; i < _eventRegister.size(); i++) {
-                    if(_eventRegister[i].eventName == eventName) {
-                        _eventRegister[i]._registry._register.push_back(reinterpret_cast<void*>(callbackReference<T...>));
-                        uint8_t eventID = 0;
-                        for(uint8_t j = 0; j < _eventRegister[i]._registry._register.size(); j++) {
-                            eventID++;
-                        }
-                        return eventID - 1;
-                    }
-                }
-
-                Events _events;
-                _events.eventName = eventName;
-                _events._registry._register.push_back(reinterpret_cast<void*>(callbackReference<T...>));
-                _eventRegister.push_back(_events);
-                return 0;
-            }
+            template<typename... T> uint8_t on(const char* eventName, void (*callback)(T...));
 
             /*
                 the generic function might return wrong type def so if you want to make sure to use correctly
                 please give an explicit type in between 2 curly brackets
                 @example void emit<const char*, float, int, uint8_t, char>()
             */
-            template<typename... T> void emit(const char* eventName, T... params) {
-                void (*_callbackFunc)(T...);
-                for(uint8_t i = 0; i < _eventRegister.size(); i++) {
-                    if(_eventRegister[i].eventName == eventName) {
-                        for(uint8_t j = 0; j < _eventRegister[i]._registry._register.size(); j++) {
-                            _callbackFunc = reinterpret_cast<void(*)(T...)>(_eventRegister[i]._registry._register[j]);
-                            _callbackFunc(params...);
-                        }
-                    }
-                }
-            }
+            template<typename... T> void emit(const char* eventName, T... params);
 
-            void off(const char* eventName, uint8_t eventID) {
-                for(uint8_t i = 0; i < _eventRegister.size(); i++) {
-                    if(_eventRegister[i].eventName == eventName){
-                        _eventRegister[i]._registry._register.erase(_eventRegister[i]._registry._register.begin() + eventID);
-                    }
-                }
-            }
+            void off(const char* eventName, uint8_t eventID);
 
-            void dismiss(const char* eventName) {
-                for(uint8_t i = 0; i < _eventRegister.size(); i++) {
-                    if(_eventRegister[i].eventName == eventName) {
-                        _eventRegister.erase(_eventRegister.begin() + i);
-                    }
-                }
-            }
+            void dismiss(const char* eventName);
     };
 };
+
+#include "EventEmitter.tpp"
 
 #endif //EVENT_EMITTER_HPP_
