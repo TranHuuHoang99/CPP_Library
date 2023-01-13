@@ -7,7 +7,34 @@
 
 using namespace std;
 
+
 namespace Event {
+    /*
+        This struct and function lambda_cast to convert from capturing lambda function to function pointer
+        if you want to apply or change variables out of lambda function scope you'll suppose to use if
+    */
+    template<typename... T>
+    struct Lambda {
+        template<typename LambdaPtr>
+        static void lambda_expression(T... params) {
+            return (void)(*(LambdaPtr*)func_address())(params...);
+        }
+
+        template<typename CallbackType = void(*)(T...), typename FunctionType>
+        static CallbackType lambda_cast(FunctionType& _type) {
+            func_address(&_type); // holder the address of lambda function thround void pointer
+            return (CallbackType)lambda_expression<FunctionType>;
+        }
+        
+        static void* func_address(void* address = nullptr) {
+            void* _func_ptr;
+            if(address != nullptr) {
+                _func_ptr = address;
+            }
+            return _func_ptr;
+        }
+    };
+
     class EventEmitter {
         public:
             EventEmitter() = default;

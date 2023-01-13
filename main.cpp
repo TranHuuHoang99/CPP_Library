@@ -1,29 +1,33 @@
 #include <iostream>
-#include <stdint.h>
 #include "EventEmitter/EventEmitter.hpp"
-
 
 using namespace std;
 
 
+
+
 int main(void) {
-    uint8_t value1 = Event::EventEmitter::inst()->on<const char*>("hoang", *[](const char* name) {
-        cout << "lele " << name << endl;
-    });
 
-    uint8_t value2 = Event::EventEmitter::inst()->on<const char*>("hoang", *[](const char* name) {
-        cout << name << endl;
-    });
+    char* _name = "hoang";
+    int _age = 1999;
+    cout << _name << endl;
+    cout << _age << endl;
 
-    Event::EventEmitter::inst()->on<const char*>("as", *[](const char* name) {
-        cout <<"sdfa "<< name << endl;
-    });
-
-    // Event::EventEmitter::inst()->off("hoang", value1);
-    // Event::EventEmitter::inst()->off("hoang", value2);
+    auto _callback = [&](char* name, int age) {
+        _name = name;
+        _age = age;
+    };
 
 
-    Event::EventEmitter::inst()->emit<const char*>("hoang", "dzasdf"); 
+    void (*callback)(char*,int) = Event::Lambda<char*, int>::lambda_cast(_callback);
 
+    // callback("hoangprodn", 2023);
+
+    Event::EventEmitter::inst()->on<char*, int>("hoang", callback);
+    Event::EventEmitter::inst()->emit<char*, int>("hoang", "hoangprodn", 2024);
+
+    cout << _name << endl;
+    cout << _age << endl;
+    
     return 0;
 }
