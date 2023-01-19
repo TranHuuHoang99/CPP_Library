@@ -14,34 +14,34 @@ namespace Event {
         return EventEmitter::_inst; 
     }
 
-    template<typename... T> uint8_t EventEmitter::on(const char* eventName, void (*callback)(T...)) {
-        callbackReference<T...> = callback;
+    template<typename... T> uint8_t EventEmitter::on(const char* eventName, void (*&callback)(T...)) {
+        callback(255);
 
-        for(uint8_t i = 0; i < _eventRegister.size(); i++) {
-            if(_eventRegister[i].eventName == eventName) {
-                _eventRegister[i]._registry._register.push_back(reinterpret_cast<void*>(callbackReference<T...>));
-                uint8_t eventID = 0;
-                for(uint8_t j = 0; j < _eventRegister[i]._registry._register.size(); j++) {
-                    eventID++;
-                }
-                return eventID - 1;
-            }
-        }
+        // callbackReference<T...> = callback;
 
-        Events _events;
-        _events.eventName = eventName;
-        _events._registry._register.push_back(reinterpret_cast<void*>(callbackReference<T...>));
-        _eventRegister.push_back(_events);
+        // for(uint8_t i = 0; i < _eventRegister.size(); i++) {
+        //     if(_eventRegister[i].eventName == eventName) {
+        //         _eventRegister[i]._registry._register.push_back(reinterpret_cast<void*>(callbackReference<T...>));
+        //         uint8_t eventID = 0;
+        //         for(uint8_t j = 0; j < _eventRegister[i]._registry._register.size(); j++) {
+        //             eventID++;
+        //         }
+        //         return eventID - 1;
+        //     }
+        // }
+
+        // Events _events;
+        // _events.eventName = eventName;
+        // _events._registry._register.push_back(reinterpret_cast<void*>(callbackReference<T...>));
+        // _eventRegister.push_back(_events);
         return 0;
     }
 
     template<typename... T> void EventEmitter::emit(const char* eventName, T... params) {
-        void (*_callbackFunc)(T...);
         for(uint8_t i = 0; i < _eventRegister.size(); i++) {
             if(_eventRegister[i].eventName == eventName) {
                 for(uint8_t j = 0; j < _eventRegister[i]._registry._register.size(); j++) {
-                    _callbackFunc = reinterpret_cast<void(*)(T...)>(_eventRegister[i]._registry._register[j]);
-                    _callbackFunc(params...);
+                    reinterpret_cast<void(*)(T...)>(_eventRegister[i]._registry._register[j])(params...);
                 }
             }
         }

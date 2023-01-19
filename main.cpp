@@ -1,33 +1,21 @@
 #include <iostream>
+#include <stdio.h>
 #include "EventEmitter/EventEmitter.hpp"
 
 using namespace std;
 
-
-
-
 int main(void) {
+    int _age = 23;
 
-    char* _name = "hoang";
-    int _age = 1999;
-    cout << _name << endl;
-    cout << _age << endl;
-
-    auto _callback = [&](char* name, int age) {
-        _name = name;
+    auto _callback = [&](int age) {
         _age = age;
     };
 
+    void (*callback)(int) = Event::Lambda<int>::lambda_cast(_callback);
 
-    void (*callback)(char*,int) = Event::Lambda<char*, int>::lambda_cast(_callback);
+    Event::EventEmitter::inst()->on<int>("hoangprodn", callback);
 
-    // callback("hoangprodn", 2023);
-
-    Event::EventEmitter::inst()->on<char*, int>("hoang", callback);
-    Event::EventEmitter::inst()->emit<char*, int>("hoang", "hoangprodn", 2024);
-
-    cout << _name << endl;
     cout << _age << endl;
-    
+
     return 0;
 }

@@ -68,7 +68,7 @@ namespace Event {
                     this generic function is supposed to be defined before calling emit function below
                     and this must be happened first
             */
-            template<typename... T> uint8_t on(const char* eventName, void (*callback)(T...));
+            template<typename... T> uint8_t on(const char* eventName, void (*&callback)(T...));
 
             /*
                 the generic function might return wrong type def so if you want to make sure to use correctly
