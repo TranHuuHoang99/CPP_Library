@@ -4,7 +4,8 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "C:/TCC/Tools/mingw64/5.4.0_WIN64/x86_64-w64-mingw32/include/c++"
+                "C:/TCC/Tools/mingw64/5.4.0_WIN64/x86_64-w64-mingw32/include/c++",
+                "C:/Users/TOH4HC/AppData/Local/Programs/Python/Python310/include"
             ],
             "defines": [
                 "_DEBUG",
