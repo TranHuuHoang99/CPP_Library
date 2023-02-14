@@ -8,3 +8,6 @@ https://www.youtube.com/watch?v=7kxbNM41bXg
 
 back progration machine learning
 https://towardsdatascience.com/how-does-back-propagation-work-in-neural-networks-with-worked-example-bc59dfb97f48
+
+back propagration PHAM THANH
+https://www.youtube.com/watch?v=u8JdDFvh9X4&list=PLmtLOdLKF-og3HsyUGGNR5lhn96TOUllX&index=5
