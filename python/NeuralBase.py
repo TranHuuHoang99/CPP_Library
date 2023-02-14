@@ -97,3 +97,5 @@ class NeuralBase:
 if __name__ == "__main__":
     file_path = './dataset/tomato/tomato.jpg'
     file_des = './dataset/train_data/maxpooling.jpg'
+
+    
