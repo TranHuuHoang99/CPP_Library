@@ -5,3 +5,6 @@ https://www.youtube.com/watch?v=8Xr_t4mQUP4
 cython 
 
 https://www.youtube.com/watch?v=7kxbNM41bXg
+
+back progration machine learning
+https://towardsdatascience.com/how-does-back-propagation-work-in-neural-networks-with-worked-example-bc59dfb97f48

@@ -23,7 +23,7 @@ class NeuralBase:
         self.image = output
         return self.image
 
-    def relu(self, value: np.float64) -> np.float64:
+    def _relu(self, value: np.float64) -> np.float64:
         if value > 0:
             return value
         return 0
@@ -66,56 +66,34 @@ class NeuralBase:
         output = output.reshape(self.height * self.width * self.depth)
         return output
 
-    def feed_forward(self, features_in = np.ndarray, features_out = 0) -> np.ndarray:
+    def self_learning(self, input: int, output: int) -> None:
+        self.weights = np.zeros([input], dtype=np.float64)
+        self.biases = np.zeros([output], dtype=np.float64)
+        for i in range(self.weights.size):
+            self.weights[i] = random.uniform(-1,1)
+        for j in range(self.biases.size):
+            self.biases[j] = random.uniform(-1,1)
+
+    def linear(self, features_in = np.ndarray, features_out = 0) -> np.ndarray:
+        self.self_learning(input=features_in.size, output=features_out)
         _features_in = features_in.size
         self.ff_output = np.zeros([features_out], dtype=np.float64)
         for i in range(features_out):
             for j in range(_features_in):
-                self.ff_output[i] = self.ff_output[i] + (features_in[j] * random.uniform(-1,1))
-            self.ff_output[i] = self.ff_output[i] + random.uniform(-1,1)
+                self.ff_output[i] = self.ff_output[i] + (features_in[j] * self.weights[j])
+            self.ff_output[i] = self.ff_output[i] + self.biases[i]
         return self.ff_output
 
-    def softmax(self) -> np.ndarray:
+    def relu(self) -> np.ndarray:
         len_ff_output = self.ff_output.size
         for i in range(len_ff_output):
-            self.ff_output[i] = self.relu(self.ff_output[i])
+            self.ff_output[i] = self._relu(self.ff_output[i])
         return self.ff_output
 
-    def show_shape(self) -> None:
-        print("HEIGHT: ", self.height, "\n")
-        print("WIDTH: ", self.width, "\n")
-        print("DEPTH: ", self.depth, "\n")
+    def drop_out(self, drop_expec = 0.5) -> np.ndarray:
+        self.ff_output = self.ff_output * drop_expec
+        return self.ff_output
 
 if __name__ == "__main__":
     file_path = './dataset/tomato/tomato.jpg'
     file_des = './dataset/train_data/maxpooling.jpg'
-
-    np_image = np.array(im.open(file_path))
-    _neuralBase = NeuralBase(np_image)
-
-    np_image = _neuralBase.conv3d(kernel_size=[3,3,3])
-    np_image = _neuralBase.maxpooling(kernel_size=[2,2,3])
-
-    np_image = _neuralBase.conv3d(kernel_size=[3,3,3])
-    np_image = _neuralBase.maxpooling(kernel_size=[2,2,3])
-
-    np_image = _neuralBase.conv3d(kernel_size=[3,3,3])
-    np_image = _neuralBase.maxpooling(kernel_size=[2,2,3])
-
-    np_image = _neuralBase.flatten()
-    np_image = _neuralBase.feed_forward(np_image, 972)
-    np_image = _neuralBase.softmax()
-
-    np_image = _neuralBase.feed_forward(np_image, 486)
-    np_image = _neuralBase.softmax()
-
-    np_image = _neuralBase.feed_forward(np_image, 243)
-    np_image = _neuralBase.softmax()
-
-    np_image = _neuralBase.feed_forward(np_image, 121)
-    np_image = _neuralBase.softmax()
-
-    np_image = _neuralBase.feed_forward(np_image, 10)
-    np_image = _neuralBase.softmax()
-
-    print(np_image[:])
