@@ -16,10 +16,11 @@ class linear(Module):
         self.in_features = in_features
         self.out_features = out_features
 
-        self.output_pred = ...
-
         self.weight = np.zeros([out_features, in_features], dtype=np.float16)
         self.bias = np.zeros([out_features], dtype=np.float16)
+        
+        self.delta_weight = np.zeros([out_features, in_features], dtype=np.float16)
+        self.delta_bias = np.zeros([out_features], dtype=np.float16)
 
         for i in range(out_features):
             for j in range(in_features):
@@ -28,13 +29,13 @@ class linear(Module):
 
     def forward(self, features) -> np.ndarray:
         super().forward(features)
-        self.output_pred = np.zeros([self.out_features], dtype=np.float16)
+        output_pred = np.zeros([self.out_features], dtype=np.float16)
         for i in range(self.out_features):
             for j in range(self.in_features):
-                self.output_pred[i] += features[j] * self.weight[i,j]
-            self.output_pred[i] += self.bias[i]
+                output_pred[i] += features[j] * self.weight[i,j]
+            output_pred[i] += self.bias[i]
 
-        return self.output_pred
+        return output_pred
 
 class relu(Module):
     def __init__(self) -> None:
@@ -53,6 +54,8 @@ class sequence(Module):
         super().__init__()
         self.fc = fc
         self.conv = conv
+        self.z = []
+        self.a = []
         self.linear = []
         for i in range(self.fc.__len__()):
             if self.fc[i].name == "linear":
@@ -60,6 +63,14 @@ class sequence(Module):
         
     def feedforward(self, features):
         super().feedforward(features)
-
+        self.z = []
+        self.a = []
+        self.first_features = []
         for i in range(self.fc.__len__()):
             self.features = self.fc[i].forward(self.features)
+            if i == 0:
+                self.first_features.append(self.features)
+            if self.fc[i].name == "linear":
+                self.z.append(self.features)
+            elif self.fc[i].name == "relu":
+                self.a.append(self.features)
