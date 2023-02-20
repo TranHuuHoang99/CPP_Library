@@ -29,10 +29,12 @@ def atttach_lable(arr) -> int:
 
 if __name__ == "__main__":
     model = NeuralNetwork()
-    arr = [rand.randrange(0,1), rand.randrange(0,1)]
-    for i in range(2000):
-        model.model.feedforward(arr)
-        print(model.model.features)
-        model.back_propagation(0.01, atttach_lable(arr=arr))
-        
+    # arr = [rand.randrange(0,1), rand.randrange(0,1)]
+    # for i in range(3000):
+    #     model.model.feedforward(arr)
+    #     print(model.model.features)
+    #     model.back_propagation(0.01, atttach_lable(arr=arr))
+    # model.save("XOR_NN.brain")
 
+    _brain: Brain = pickle.load(open('XOR_NN.brain'))
+    _brain.predict([1,0], model=model)

@@ -34,6 +34,7 @@ uint8_t EventEmitter::on(const char* eventName, std::function<void(T...)> callba
     _events.eventName = eventName;
     _events._registry._register.push_back(holder);
     _eventRegister.push_back(_events);
+    return 0;
 }
 
 template<typename... T>
