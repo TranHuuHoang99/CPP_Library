@@ -42,6 +42,7 @@
         "typeinfo": "cpp",
         "python.h": "c",
         "stdio.h": "c",
-        "stdint.h": "c"
+        "stdint.h": "c",
+        "cinttypes": "cpp"
     }
 }

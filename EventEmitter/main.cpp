@@ -1,31 +1,31 @@
 #include <iostream>
 #include "EventEmitter.hpp"
-#include <windows.h>
 
 using namespace std;
 
-class A {
+class Module {
     public:
-        A() {
-            auto callback = [&](char *name, int age) {
-                cout << name << endl;
+        Module() {
+            test();
+        }
+
+        ~Module() {
+
+        }
+
+    private:
+        void test(void) {
+            auto callback = [&](int age) {
                 cout << age << endl;
             };
 
-            EventEmitter::inst()->on<char*,int>("hoangprodn", Lambda<char*,int>::lambda_cast(callback));
-        }
-
-        ~A() {
-
+            EventEmitter::inst()->on<int>("hoangprodn", Lambda<int>::cast(callback));
         }
 };
 
 int main(void) {
-    A *_a = new A();
+    Module _module;
+    EventEmitter::inst()->emit<int>("hoangprodn", 1999);
 
-    while(true) {
-        
-        EventEmitter::inst()->emit<char*,int>("hoangprodn", "hoang", 1999);
-    }
     return 0;
 }
