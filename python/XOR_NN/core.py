@@ -30,10 +30,10 @@ class Brain:
 
         return NeuralNetwork.model
         
-    def predict(self, input_features, NeuralNetwork) -> np.float16:
+    def predict(self, input_features, NeuralNetwork) -> np.float64:
         nn:sequence = self.loadparam(NeuralNetwork=NeuralNetwork)
         nn.feedforward(input_features)
-        accuracy = 1 - nn.features[0]
+        accuracy = nn.features[0]
 
         if accuracy >= 0.6:
             print(1)
@@ -51,8 +51,8 @@ class core:
 
     def reset_weight(self):
         for i in reversed(range(self.model.linear.__len__())):
-            self.model.linear[i].delta_weight = np.zeros([self.model.linear[i].out_features, self.model.linear[i].in_features], dtype=np.float16)
-            self.model.linear[i].delta_bias = np.zeros([self.model.linear[i].out_features], dtype=np.float16)
+            self.model.linear[i].delta_weight = np.zeros([self.model.linear[i].out_features, self.model.linear[i].in_features], dtype=np.float64)
+            self.model.linear[i].delta_bias = np.zeros([self.model.linear[i].out_features], dtype=np.float64)
     
     def back_propagation(self, learning_rate, lable):
         if self.model == Ellipsis:
@@ -66,8 +66,8 @@ class core:
         self.brain.bias_linear = []
 
         for i in reversed(range(self.model.linear.__len__())):
-            updated_weight = np.zeros([self.model.linear[i].out_features, self.model.linear[i].in_features], dtype=np.float16)
-            updated_bias = np.zeros([self.model.linear[i].out_features], dtype=np.float16)
+            updated_weight = np.zeros([self.model.linear[i].out_features, self.model.linear[i].in_features], dtype=np.float64)
+            updated_bias = np.zeros([self.model.linear[i].out_features], dtype=np.float64)
 
             for j in range(self.model.linear[i].out_features):
                 for k in range(self.model.linear[i].in_features):
@@ -86,7 +86,7 @@ class core:
     def save(self, path):
         pickle.dump(self.brain, open(path, "wb"))
         
-    def delta_weight(self, label, i, j, k) -> np.float16:
+    def delta_weight(self, label, i, j, k) -> np.float64:
         updated_weight = 1
         sumof_before_weight = 0
         deriv = 0
@@ -106,12 +106,12 @@ class core:
             sumof_before_weight = 1
         else:
             for index in range(self.model.linear[i+1].out_features):
-                sumof_before_weight += (self.model.linear[i+1].delta_weight[index][k] * self.model.linear[i+1].weight[index][k])
+                sumof_before_weight += (self.model.linear[i+1].delta_weight[index][j] * self.model.linear[i+1].weight[index][j])
 
         updated_weight = (self.model.features[0] - label) * sumof_before_weight * deriv * input_features
         return updated_weight
 
-    def delta_bias(self, label, i, j, k) -> np.float16:
+    def delta_bias(self, label, i, j, k) -> np.float64:
         updated_bias = 1
         sumof_before_weight = 0
         deriv = 0
@@ -126,7 +126,7 @@ class core:
             sumof_before_weight = 1
         else:
             for index in range(self.model.linear[i+1].out_features):
-                sumof_before_weight += (self.model.linear[i+1].delta_weight[index][k] * self.model.linear[i+1].weight[index][k])
+                sumof_before_weight += (self.model.linear[i+1].delta_weight[index][j] * self.model.linear[i+1].weight[index][j])
 
         updated_bias = (self.model.features[0] - label) * sumof_before_weight * deriv * deriv_z_of_bias
         return updated_bias
