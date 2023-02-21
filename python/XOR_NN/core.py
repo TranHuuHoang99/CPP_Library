@@ -11,28 +11,38 @@ class Brain:
         self.weight_linear = []
         self.bias_linear = []
 
-    def model_param_booted(self, model) -> None:
-        for i in reversed(range(model.linear.__len__())):
-            for j in range(model.linear[i].out_features):
-                for k in range(model.linear[i].in_features):
-                    model.linear[i].weight[j,k] = self.weight_linear[i][j][k]
+    def loadparam(self, NeuralNetwork) -> sequence:
+        index_reversed = 0
 
-        index = 0
-        for i in range(model.fc.__len__()):
-            if model.fc[i].name == "linear":
-                model.fc[i] = model.linear[index]
-                index += 1
+        for i in reversed(range(NeuralNetwork.model.linear.__len__())):
+            for j in range(NeuralNetwork.model.linear[i].out_features):
+                for k in range(NeuralNetwork.model.linear[i].in_features):
+                    NeuralNetwork.model.linear[i].weight = self.weight_linear[index_reversed][j][k]
+                NeuralNetwork.model.linear[i].bias = self.bias_linear[index_reversed][j]
+            index_reversed += 1
 
-    def predict(self, input_features, model) -> None:
-        self.model_param_booted()
-        model.model.feedforward(input_features)
-        accuracy = 1 - model.model.features[0][0]
+        index = 1
+        for i in range(NeuralNetwork.model.fc.__len__()):
+            if NeuralNetwork.model.fc[i].name == "linear":
+                NeuralNetwork.model.fc[i].weight = self.weight_linear[index]
+                NeuralNetwork.model.fc[i].bias = self.bias_linear[index]
+                index -= 1
+
+        return NeuralNetwork.model
+        
+    def predict(self, input_features, NeuralNetwork) -> np.float16:
+        nn:sequence = self.loadparam(NeuralNetwork=NeuralNetwork)
+        nn.feedforward(input_features)
+        accuracy = 1 - nn.features[0]
+
         if accuracy >= 0.6:
-            print("LABEL IS : 1")
+            print(1)
         elif accuracy <= 0.5:
-            print("LABEL IS : 0")
+            print(0)
         else:
-            print("not sure")
+            print("unknow")
+        
+        return accuracy
 
 class core:
     def __init__(self) -> None:
