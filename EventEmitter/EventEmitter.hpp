@@ -4,15 +4,10 @@
 #include <iostream>
 #include <stdint.h>
 #include <vector>
-#include <functional>
+#include <string.h>
 
-template<typename... T>
-struct Lambda {
-    template<typename FunctionType>
-    static std::function<void(T...)> cast(FunctionType& _function) {
-        return static_cast<std::function<void(T...)>>(_function);
-    }
-};
+using namespace std;
+
 
 class EventEmitter {
     public: 
@@ -22,6 +17,7 @@ class EventEmitter {
     private:
         EventEmitter(EventEmitter const&) = delete;
         void operator =(EventEmitter const&) = delete;
+        template<typename... T> using function = void(*)(T...);
 
     private:
         static EventEmitter *_inst;
@@ -41,9 +37,9 @@ class EventEmitter {
         static EventEmitter *inst(void);
 
         template<typename... T>
-        uint8_t on(const char* eventName, std::function<void(T...)> callback) {
-            holder = &callback;
-
+        uint8_t on(const char* eventName, void(*callback)(T...)) {
+            holder = (void*)callback;
+            
             if(_eventRegister.size() != 0) {
                 for(uint8_t i = 0; i < _eventRegister.size(); i++) {
                     if(_eventRegister[i].eventName == eventName) {
@@ -67,13 +63,13 @@ class EventEmitter {
         
         template<typename... T>
         void emit(const char* eventName, T... params) {
-            std::function<void(T...)>* callback;
-        
+            void(*callback)(T...);
+
             for(uint8_t i = 0; i < _eventRegister.size(); i++) {
-                if(_eventRegister[i].eventName == eventName) {
+                if(strcmp(_eventRegister[i].eventName, eventName) == 0) {
                     for(uint8_t j = 0; j < _eventRegister[i]._registry._register.size(); j++) {
-                        callback = (std::function<void(T...)>*)((_eventRegister[i]._registry._register[j]));
-                        (*callback)(params...);
+                        callback = (void(*)(T...))_eventRegister[i]._registry._register[j];
+                        callback(params...);
                     }
                 }
             }

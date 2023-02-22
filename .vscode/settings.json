@@ -43,6 +43,7 @@
         "python.h": "c",
         "stdio.h": "c",
         "stdint.h": "c",
-        "cinttypes": "cpp"
+        "cinttypes": "cpp",
+        "string": "cpp"
     }
 }
