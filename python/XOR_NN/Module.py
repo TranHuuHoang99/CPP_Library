@@ -65,11 +65,9 @@ class sequence(Module):
         super().feedforward(features)
         self.z = []
         self.a = []
-        self.first_features = []
+        self.first_features = features
         for i in range(self.fc.__len__()):
             self.features = self.fc[i].forward(self.features)
-            if i == 0:
-                self.first_features.append(self.features)
             if self.fc[i].name == "linear":
                 self.z.append(self.features)
             elif self.fc[i].name == "relu":

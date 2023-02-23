@@ -14,9 +14,6 @@ class Brain:
     def loadparam(self, NeuralNetwork) -> sequence:
         index_reversed = 0
 
-        print(self.weight_linear, "\n")
-        print(self.bias_linear)
-
         for i in reversed(range(NeuralNetwork.model.linear.__len__())):
             for j in range(NeuralNetwork.model.linear[i].out_features):
                 for k in range(NeuralNetwork.model.linear[i].in_features):
@@ -32,18 +29,24 @@ class Brain:
                 index -= 1
 
         return NeuralNetwork.model
+
+    def none_minus(self, input) -> np.float64:
+        if input < 0:
+            return -input
+        return input
         
-    def predict(self, input_features, NeuralNetwork) -> np.float64:
+    def predict(self, input_features, NeuralNetwork):
         nn:sequence = self.loadparam(NeuralNetwork=NeuralNetwork)
         nn.feedforward(input_features)
         nn.features[0]
 
+        loss = self.none_minus(1-nn.features[0])
+        accuracy = 1 - loss
+
         if nn.features[0] >= 0.6:
-            print(1)
-        elif nn.features[0] <= 0.5:
-            print(0)
-        
-        return nn.features[0]
+            print("LABEL IS : ", 1, " accuracy : ", accuracy, " loss : ", loss)
+        else:
+            print("LABEL IS : ", 0, " accuracy : ", accuracy, " loss : ", loss)
 
 class core:
     def __init__(self) -> None:
@@ -59,12 +62,10 @@ class core:
         for i in reversed(range(self.model.linear.__len__())):
             for j in range(self.model.linear[i].out_features):
                 for k in range(self.model.linear[i].in_features):
-                    self.model.linear[i].delta_weight[j,k] += self.delta_weight(label=lable, i=i, j=j, k=k)
-                    self.model.linear[i].delta_weight[j,k] *= (1/self.epoch)
+                    self.model.linear[i].delta_weight[j,k] = self.delta_weight(label=lable, i=i, j=j, k=k)
                     self.model.linear[i].weight[j,k] -= learning_rate * self.model.linear[i].delta_weight[j,k]
 
-                self.model.linear[i].delta_bias[j] += self.delta_bias(label=lable, i=i, j=j, k=0)
-                self.model.linear[i].delta_bias[j] *= (1/self.epoch)
+                self.model.linear[i].delta_bias[j] = self.delta_bias(label=lable, i=i, j=j, k=0)
                 self.model.linear[i].bias[j] -= learning_rate * self.model.linear[i].delta_bias[j]
 
     def save(self, path):
@@ -78,26 +79,28 @@ class core:
         pickle.dump(self.brain, open(path, "wb"))
         
     def delta_weight(self, label, i, j, k) -> np.float64:
+        
+
         updated_weight = 1
         sumof_before_weight = 0
         deriv = 0
         input_features = 0
 
-        if (i + 1) > self.model.linear.__len__():
+        if (i + 1) >= self.model.linear.__len__():
             deriv = 1
         else:
             deriv = (1 - self.model.a[i][j])
 
         if (i - 1) < 0:
-            input_features = self.model.first_features[0][k]
+            input_features = self.model.first_features[k]
         else:
             input_features = self.model.a[i-1][k]
 
-        if (i + 2) > self.model.linear.__len__():
+        if (i + 1) >= self.model.linear.__len__():
             sumof_before_weight = 1
         else:
             for index in range(self.model.linear[i+1].out_features):
-                sumof_before_weight += (self.model.linear[i+1].delta_weight[index][j] * self.model.linear[i+1].weight[index][j])
+                sumof_before_weight += (self.model.features[0] - label) * (self.model.linear[i+1].delta_weight[index][j] * self.model.linear[i+1].weight[index][j])
 
         updated_weight = (self.model.features[0] - label) * sumof_before_weight * deriv * input_features
         return updated_weight
@@ -106,19 +109,18 @@ class core:
         updated_bias = 1
         sumof_before_weight = 0
         deriv = 0
-        deriv_z_of_bias = 1
 
-        if (i + 1) > self.model.linear.__len__():
+        if (i + 1) >= self.model.linear.__len__():
             deriv = 1
         else:
             deriv = (1 - self.model.a[i][j])
 
-        if (i + 2) > self.model.linear.__len__():
+        if (i + 1) >= self.model.linear.__len__():
             sumof_before_weight = 1
         else:
             for index in range(self.model.linear[i+1].out_features):
-                sumof_before_weight += (self.model.linear[i+1].delta_weight[index][j] * self.model.linear[i+1].weight[index][j])
+                sumof_before_weight += (self.model.linear[i+1].delta_weight[index][j] * self.model.linear[i+1].weight[index][j]) * (self.model.features[0] - label)
 
-        updated_bias = (self.model.features[0] - label) * sumof_before_weight * deriv * deriv_z_of_bias
+        updated_bias = (self.model.features[0] - label) *  sumof_before_weight * deriv
         return updated_bias
 
