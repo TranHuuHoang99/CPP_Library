@@ -1,16 +1,10 @@
-import ctypes
-import numpy as np
-from PIL import Image as im
-import random
-import pickle
-from PyQt5.QtWidgets import QApplication, QWidget
-from PyQt5 import QtWidgets
-import sys
-import math
-from typing import overload
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = QWidget()
-    window.show()
-    app.exec()
+from lib import *
+from Module import (
+    linear,
+    maxpooling,
+    flatten,
+    conv3d,
+    relu,
+    drop_out,
+    sequence
+)
