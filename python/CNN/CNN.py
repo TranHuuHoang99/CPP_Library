@@ -32,12 +32,3 @@ class CNN:
                 nn.relu()
             ]
         )
-    
-if __name__ == "__main__":
-    model = CNN()
-    image_path = './data/dataset/Training/image_cachua'
-    file = os.listdir(image_path)
-    image_file_path = image_path + '/' + ""+str(file[0])+""
-    image_to_np = np.array(im.open(image_file_path))
-    
-    model.model.forward_prop(image_to_np)

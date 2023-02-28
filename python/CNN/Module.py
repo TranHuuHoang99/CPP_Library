@@ -111,6 +111,9 @@ class linear(ModuleBase):
         self.weight = np.zeros([self.features_out, self.features_in], dtype=np.float64)
         self.bias = np.zeros([self.features_out], dtype=np.float64)
 
+        self.dWeight = np.zeros([self.features_out, self.features_in], dtype=np.float64)
+        self.dBias = np.zeros([self.features_out], dtype=np.float64)
+
         self.z = np.zeros([self.features_out], dtype=np.float64)
 
         for i in range(self.features_out):
@@ -159,8 +162,25 @@ class sequence:
         self.conv = conv
         self.output: np.ndarray = ...
 
+        self.linear = []
+        self.relu = []
+        self.drop_out = []
+
+        for i in range(self.fc.__len__()):
+            if self.fc[i].name == "linear":
+                self.linear.append(self.fc[i])
+            elif self.fc[i].name == "relu":
+                self.relu.append(self.fc[i])
+            elif self.fc[i].name == "drop_out":
+                self.drop_out.append(self.fc[i])
+            else:
+                pass
+
+        self.layer_cout = self.linear.__len__()
+
     def forward_prop(self, features) -> None:
         self.output = features
+        self.none_updated_features = features
         if self.conv == []:
             pass
         else:
@@ -172,3 +192,68 @@ class sequence:
         else:
             for i in range(self.fc.__len__()):
                 self.output = self.fc[i].feedforward(self.output)
+
+    def backward_prop(self, learning_rate, label):
+        for label_index in range(label.__len__()):
+            for layer_index in reversed(range(self.layer_cout)):
+                for features_out_index in range(self.linear[layer_index].features_out):
+                    for features_in_index in range(self.linear[layer_index].features_in):
+                        self.linear[layer_index].dWeight[features_out_index, features_in_index] = self.__deriv_weight(
+                            label=label[label_index],
+                            label_index=label_index,
+                            layer_index = layer_index,
+                            features_out_index = features_out_index,
+                            features_in_index = features_in_index
+                        )
+
+                        self.linear[layer_index].weight[features_out_index, features_in_index] -= learning_rate \
+                        * self.linear[layer_index].dWeight[features_out_index, features_in_index]
+
+                    self.linear[layer_index].dBias[features_out_index] = self.__deriv_bias(
+                        label=label[label_index],
+                        label_index = label_index,
+                        layer_index = layer_index,
+                        features_out_index = features_out_index
+                    )
+
+                    self.linear[layer_index].bias[features_out_index] -= learning_rate \
+                    * self.linear[layer_index].dBias[features_out_index]
+
+
+    def __deriv_weight(self, label, label_index, layer_index, features_out_index, features_in_index):
+        sum_deriv_weight = 0
+        a_deriv = 0
+        input_features = 0
+
+        if (layer_index + 1) >= self.linear.__len__():
+            a_deriv = 1
+            sum_deriv_weight = 1
+        else:
+            a_deriv = 1 - self.relu[layer_index][features_out_index]
+            for i in range(self.linear[layer_index+1].features_out):
+                sum_deriv_weight += (self.output[label_index] - label) * self.linear[layer_index+1].dWeight[i][features_out_index] \
+                * self.linear[layer_index+1].weight[i][features_out_index]
+
+        if (layer_index - 1) < 0:
+            input_features = self.none_updated_features[features_in_index]
+        else:
+            input_features = self.relu[layer_index-1][features_in_index]
+
+        return (self.output[label_index] - label) * sum_deriv_weight * a_deriv * input_features
+    
+    def __deriv_bias(self, label, label_index, layer_index, features_out_index):
+        sum_deriv_weight = 0
+        a_deriv = 0
+
+        if (layer_index + 1) >= self.linear.__len__():
+            a_deriv = 1
+            sum_deriv_weight = 1
+        else:
+            a_deriv = 1 - self.relu[layer_index][features_out_index]
+            for i in range(self.linear[layer_index+1].features_out):
+                sum_deriv_weight += (self.output[label_index] - label) * self.linear[layer_index+1].dWeight[i][features_out_index] \
+                * self.linear[layer_index+1].weight[i][features_out_index]
+
+        return (self.output[label_index] - label) * sum_deriv_weight * a_deriv
+
+
