@@ -5,10 +5,6 @@ from Module import (
     linear,
     sequence
 )
-
-
-
-
 class Brain:
     def __init__(self) -> None:
         self.weight_linear = []
