@@ -11,3 +11,6 @@ https://towardsdatascience.com/how-does-back-propagation-work-in-neural-networks
 
 back propagration PHAM THANH
 https://www.youtube.com/watch?v=u8JdDFvh9X4&list=PLmtLOdLKF-og3HsyUGGNR5lhn96TOUllX&index=5
+
+parse arxml video
+https://www.youtube.com/watch?v=j0xr0-IAqyk

@@ -1,23 +1,22 @@
-from lxml import etree
+from xml.etree import ElementTree
 import os
 
-
 class ParseXML:
-    def __init__(self, arxml_path) -> None:
-        self.arxml_path = arxml_path
+    def __init__(self, xml_path) -> None:
+        self.xml_path = xml_path
 
     def extract_data(self):
         root_path = os.path.abspath(os.path.dirname(__file__))
-        arxml_file = os.path.join(root_path, self.arxml_path)
-        arxml_tree = etree.parse(arxml_file)
+        xml_file = os.path.join(root_path, self.xml_path)
+        xml_tree = ElementTree.parse(xml_file)
+        xml_root = xml_tree.getroot()
 
-        data = "//*[local-name() = 'ECUC-CONTAINER-VALUE']/*[local-name() = 'SHORT-NAME']/text()"
-        data_parsed = arxml_tree.xpath(data)
+        count = 0
+        for data in xml_root.findall('.//'):
+            for subdata in data.findall('.'):
+                if subdata.tag == '{http://autosar.org/schema/r4.0}ECUC-CONTAINER-VALUE':
+                    for sub in subdata.findall('.'):
+                        print(sub.tag)
 
-        return data_parsed
-    
-
-arxml_obj = ParseXML('raw_data/CheryFR_Dem_Customer_EcucValues.arxml')
-for DTCName in arxml_obj.extract_data():
-    print(DTCName)
-
+xml_obj = ParseXML('raw_data/CheryFR_Dem_Customer_EcucValues.arxml')
+xml_obj.extract_data()
