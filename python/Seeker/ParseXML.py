@@ -11,12 +11,24 @@ class ParseXML:
         xml_tree = ElementTree.parse(xml_file)
         xml_root = xml_tree.getroot()
 
-        count = 0
+        Dtc_temp = []
+
         for data in xml_root.findall('.//'):
-            for subdata in data.findall('.'):
-                if subdata.tag == '{http://autosar.org/schema/r4.0}ECUC-CONTAINER-VALUE':
-                    for sub in subdata.findall('.'):
-                        print(sub.tag)
+            if data.tag == "{http://autosar.org/schema/r4.0}ECUC-CONTAINER-VALUE" and \
+                data.find('./').text == "DTC_ADC_SELF_TEST_FAILURE":
+                Dtc_temp.append(data)
+
+        for data in Dtc_temp[0].findall('.//'):
+            if data.tag == "{http://autosar.org/schema/r4.0}ECUC-NUMERICAL-PARAM-VALUE":
+                for subdata in data.findall('./'):
+                    if subdata.tag == "{http://autosar.org/schema/r4.0}VALUE":
+                        subdata.text = "D91832"
+
+        ElementTree.register_namespace("", "http://autosar.org/schema/r4.0")
+
+        xml_tree.write(xml_file, encoding='UTF-8', xml_declaration=True)
+            
+
 
 xml_obj = ParseXML('raw_data/CheryFR_Dem_Customer_EcucValues.arxml')
 xml_obj.extract_data()
