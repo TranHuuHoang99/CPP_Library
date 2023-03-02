@@ -1,4 +1,4 @@
-from xml.etree import ElementTree
+from BCTARXMLParser.etree import ElementTree
 import os
 
 class ParseXML:
@@ -26,9 +26,17 @@ class ParseXML:
 
         ElementTree.register_namespace("", "http://autosar.org/schema/r4.0")
 
-        xml_tree.write(xml_file, encoding='UTF-8', xml_declaration=True)
-            
+        xml_root.set('schemaLocation', 'http://autosar.org/schema/r4.0 autosar_4-2-2.xsd')
 
+        xml_tree.write(xml_file, encoding="UTF-8", xml_declaration=True)
+
+        # add endline iso for arxml
+
+        endline_iso = ['', '<!-- Last modified by AEEE-Pro_2019.1.1 - BCT -->', '']
+
+        with open(xml_file, "a") as f:
+            f.write('\n'.join(endline_iso))
+            
 
 xml_obj = ParseXML('raw_data/CheryFR_Dem_Customer_EcucValues.arxml')
 xml_obj.extract_data()
