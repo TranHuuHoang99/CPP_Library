@@ -889,11 +889,13 @@ def _serialize_xml(write, elem, qnames, namespaces,
             items = list(elem.items())
             if items or namespaces:
                 if namespaces:
+                    write(' xsi:schemaLocation="http://autosar.org/schema/r4.0 autosar_4-2-2.xsd"')
                     for v, k in sorted(namespaces.items(),
                                        key=lambda x: x[1]):  # sort on prefix
                         if k:
                             k = ":" + k
-                        write(" xmlns%s=\"%s\"" % (k, _escape_attrib(v)))
+                        write(" xmlns%s=\"%s\"" % (k, _escape_attrib(v))) #need fixed
+                        
                 for k, v in items:
                     if isinstance(k, QName):
                         k = k.text
@@ -901,7 +903,10 @@ def _serialize_xml(write, elem, qnames, namespaces,
                         v = qnames[v.text]
                     else:
                         v = _escape_attrib(v)
+                    if v == "http://autosar.org/schema/r4.0 autosar_4-2-2.xsd":
+                        continue
                     write(" %s=\"%s\"" % (qnames[k], v))
+
             if text or len(elem) or not short_empty_elements:
                 write(">")
                 if text:
