@@ -539,6 +539,8 @@ class ElementTree:
         if file:
             self.parse(file)
 
+        self.schemalocation = None
+
     def getroot(self):
         """Return root element of this tree."""
         return self._root
@@ -690,6 +692,9 @@ class ElementTree:
                 )
         return self._root.iterfind(path, namespaces)
 
+    def register_schemalocation(self, schemalocation_version):
+        self.schemalocation = schemalocation_version
+
     def write(self, file_or_filename,
               encoding=None,
               xml_declaration=None,
@@ -746,7 +751,7 @@ class ElementTree:
                 qnames, namespaces = _namespaces(self._root, default_namespace)
                 serialize = _serialize[method]
                 serialize(write, self._root, qnames, namespaces,
-                          short_empty_elements=short_empty_elements)
+                          short_empty_elements=short_empty_elements, schemalocation=self.schemalocation)
 
     def write_c14n(self, file):
         # lxml.etree compatibility.  use output method instead
@@ -869,7 +874,7 @@ def _namespaces(elem, default_namespace=None):
     return qnames, namespaces
 
 def _serialize_xml(write, elem, qnames, namespaces,
-                   short_empty_elements, **kwargs):
+                   short_empty_elements, schemalocation = None, **kwargs):
     tag = elem.tag
     text = elem.text
     if tag is Comment:
@@ -889,7 +894,8 @@ def _serialize_xml(write, elem, qnames, namespaces,
             items = list(elem.items())
             if items or namespaces:
                 if namespaces:
-                    write(' xsi:schemaLocation="http://autosar.org/schema/r4.0 autosar_4-2-2.xsd"')
+                    if schemalocation != None:
+                        write(' xsi:schemaLocation="%s"'%(schemalocation))
                     for v, k in sorted(namespaces.items(),
                                        key=lambda x: x[1]):  # sort on prefix
                         if k:
@@ -903,7 +909,7 @@ def _serialize_xml(write, elem, qnames, namespaces,
                         v = qnames[v.text]
                     else:
                         v = _escape_attrib(v)
-                    if v == "http://autosar.org/schema/r4.0 autosar_4-2-2.xsd":
+                    if v == schemalocation:
                         continue
                     write(" %s=\"%s\"" % (qnames[k], v))
 
