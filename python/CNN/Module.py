@@ -5,8 +5,8 @@ class ModuleBase:
     def __init__(self) -> None:
         self.name = self.__class__.__name__
 
-    def feedforward(self, features: np.ndarray) -> np.ndarray:
-        ...
+    def feedforward(self, features) -> np.ndarray:
+        features = np.array(features, dtype=np.float64)
 
 class conv3d(ModuleBase):
     def __init__(self, kernel_size = [0,0,0], padding = 0, strides = 0) -> None:
@@ -114,47 +114,88 @@ class linear(ModuleBase):
         self.dWeight = np.zeros([self.features_out, self.features_in], dtype=np.float64)
         self.dBias = np.zeros([self.features_out], dtype=np.float64)
 
-        self.z = np.zeros([self.features_out], dtype=np.float64)
-
         for i in range(self.features_out):
             for j in range(self.features_in):
                 self.weight[i,j] = rand.uniform(-1,1)
             self.bias[i] = 0
 
-    def feedforward(self, features: np.ndarray) -> np.ndarray:
+    def feedforward(self, features) -> np.ndarray:
         super().feedforward(features)
+        output_pred = np.zeros([self.features_out], dtype=np.float64)
         for i in range(self.features_out):
             for j in range(self.features_in):
-                self.z[i] += features[j] * self.weight[i,j]
-            self.z[i] += self.bias[i]
-        return self.z
+                output_pred[i] += features[j] * self.weight[i,j]
+            output_pred[i] += self.bias[i]
+        return output_pred
     
 class relu(ModuleBase):
     def __init__(self) -> None:
         super().__init__()
-        self.a: np.ndarray = ...
 
-    def __relu(self, input) -> np.float64:
-        return 1 / (1 + np.exp(-input))
-
-    def feedforward(self, features: np.ndarray) -> np.ndarray:
+    def feedforward(self, features) -> np.ndarray:
         super().feedforward(features)
-        self.a = np.zeros([features.size], dtype=np.float64)
         for i in range(features.size):
-            self.a[i] = self.__relu(features[i])
-        return self.a
+            features[i] = 1 / (1 + np.exp(-features[i]))
+        return features
     
 class drop_out(ModuleBase):
     def __init__(self, drop_alpha: np.float64) -> None:
         super().__init__()
-        self.a: np.ndarray = ...
         self.drop_alpha = drop_alpha
 
     def feedforward(self, features: np.ndarray) -> np.ndarray:
         super().feedforward(features)
         for i in range(features.size):
-            self.a[i] = self.drop_alpha * features[i]
-        return self.a
+            features[i] = self.drop_alpha * features[i]
+        return features
+    
+class sequence: ...
+
+class Brain:
+    def __init__(self) -> None:
+        self.weight_linear = []
+        self.bias_linear = []
+        self.prediction = 0
+
+    def __loadparam(self, NeuralNetwork) -> sequence:
+        index_reversed = 0
+
+        for i in reversed(range(NeuralNetwork.model.linear.__len__())):
+            for j in range(NeuralNetwork.model.linear[i].features_out):
+                for k in range(NeuralNetwork.model.linear[i].features_in):
+                    NeuralNetwork.model.linear[i].weight = self.weight_linear[index_reversed][j][k]
+                NeuralNetwork.model.linear[i].bias = self.bias_linear[index_reversed][j]
+            index_reversed += 1
+
+        index = NeuralNetwork.model.linear.__len__() - 1
+        for i in range(NeuralNetwork.model.fc.__len__()):
+            if NeuralNetwork.model.fc[i].name == "linear":
+                NeuralNetwork.model.fc[i].weight = self.weight_linear[index]
+                NeuralNetwork.model.fc[i].bias = self.bias_linear[index]
+                index -= 1
+
+        return NeuralNetwork.model
+
+    def __none_minus(self, input) -> np.float64:
+        if input < 0:
+            return -input
+        return input
+    
+    def __predict(self, input_features, NeuralNetwork):
+        nn:sequence = self.__loadparam(NeuralNetwork=NeuralNetwork)
+        nn.forward_prop(input_features)
+        nn.output[0]
+        self.prediction = nn.output[0]
+
+        return 1 if nn.output[0] >= 0.6 else 0
+        
+    def predict(self, input_features, NeuralNetwork):
+        loss = self.__none_minus(self.prediction - self.__predict(input_features=input_features, NeuralNetwork=NeuralNetwork))
+        accuracy = 1 - loss
+        print("LABEL IS : %d"%(self.__predict(input_features=input_features, NeuralNetwork=NeuralNetwork)),
+                " accuracy is : %f"%(accuracy),
+                " loss is : %f"%(loss)      
+        )
     
 class sequence:
     def __init__(self, conv = [], fc = []) -> None:
@@ -166,6 +207,9 @@ class sequence:
         self.relu = []
         self.drop_out = []
 
+        self.a = []
+        self.z = []
+
         for i in range(self.fc.__len__()):
             if self.fc[i].name == "linear":
                 self.linear.append(self.fc[i])
@@ -176,11 +220,13 @@ class sequence:
             else:
                 pass
 
-        self.layer_cout = self.linear.__len__()
-
     def forward_prop(self, features) -> None:
         self.output = features
         self.none_updated_features = features
+
+        self.a = []
+        self.z = []
+        
         if self.conv == []:
             pass
         else:
@@ -192,68 +238,56 @@ class sequence:
         else:
             for i in range(self.fc.__len__()):
                 self.output = self.fc[i].feedforward(self.output)
+                if self.fc[i].name == "linear":
+                    self.z.append(self.output)
+                elif self.fc[i].name == "relu":
+                    self.a.append(self.output)
+                else:
+                    pass
 
     def backward_prop(self, learning_rate, label):
-        for label_index in range(label.__len__()):
-            for layer_index in reversed(range(self.layer_cout)):
-                for features_out_index in range(self.linear[layer_index].features_out):
-                    for features_in_index in range(self.linear[layer_index].features_in):
-                        self.linear[layer_index].dWeight[features_out_index, features_in_index] = self.__deriv_weight(
-                            label=label[label_index],
-                            label_index=label_index,
-                            layer_index = layer_index,
-                            features_out_index = features_out_index,
-                            features_in_index = features_in_index
-                        )
+        for label_i in range(label.__len__()):
+            for i in reversed(range(self.linear.__len__())):
+                for j in range(self.linear[i].features_out):
+                    for k in range(self.linear[i].features_in):
+                        self.linear[i].dWeight[j,k] = self.__dWeight(label=label,label_i=label_i,i=i,j=j,k=k)
+                        self.linear[i].weight[j,k] -= learning_rate * self.linear[i].dWeight[j,k]
 
-                        self.linear[layer_index].weight[features_out_index, features_in_index] -= learning_rate \
-                        * self.linear[layer_index].dWeight[features_out_index, features_in_index]
+                    self.linear[i].dBias[j] = self.__dBias(label=label,label_i=label_i,i=i,j=j)
+                    self.linear[i].bias[j] -= learning_rate * self.linear[i].dBias[j]
 
-                    self.linear[layer_index].dBias[features_out_index] = self.__deriv_bias(
-                        label=label[label_index],
-                        label_index = label_index,
-                        layer_index = layer_index,
-                        features_out_index = features_out_index
-                    )
-
-                    self.linear[layer_index].bias[features_out_index] -= learning_rate \
-                    * self.linear[layer_index].dBias[features_out_index]
-
-
-    def __deriv_weight(self, label, label_index, layer_index, features_out_index, features_in_index):
-        sum_deriv_weight = 0
-        a_deriv = 0
+    def __dWeight(self, label, label_i, i, j, k) ->np.float64:
+        sum_dWeight = 0
+        deriv = 0
         input_features = 0
-
-        if (layer_index + 1) >= self.linear.__len__():
-            a_deriv = 1
-            sum_deriv_weight = 1
+        if (i+1) >= self.linear.__len__():
+            deriv = 1
         else:
-            a_deriv = 1 - self.relu[layer_index][features_out_index]
-            for i in range(self.linear[layer_index+1].features_out):
-                sum_deriv_weight += (self.output[label_index] - label) * self.linear[layer_index+1].dWeight[i][features_out_index] \
-                * self.linear[layer_index+1].weight[i][features_out_index]
-
-        if (layer_index - 1) < 0:
-            input_features = self.none_updated_features[features_in_index]
+            deriv = 1 - self.a[i][j]
+        if (i-1) < 0:
+            input_features = self.none_updated_features[k]
         else:
-            input_features = self.relu[layer_index-1][features_in_index]
-
-        return (self.output[label_index] - label) * sum_deriv_weight * a_deriv * input_features
+            input_features = self.a[i-1][k]
+        if (i+1) >= self.linear.__len__():
+            sum_dWeight = 1
+        else:
+            for index in range(self.linear[i+1].features_out):
+                sum_dWeight += (self.output[label_i]-label) * self.linear[i+1].dWeight[index][j] \
+                            * self.linear[i+1].weight[index][j]
+        return (self.output[label_i]-label) * sum_dWeight * deriv * input_features
     
-    def __deriv_bias(self, label, label_index, layer_index, features_out_index):
-        sum_deriv_weight = 0
-        a_deriv = 0
-
-        if (layer_index + 1) >= self.linear.__len__():
-            a_deriv = 1
-            sum_deriv_weight = 1
+    def __dBias(self, label, label_i, i, j) -> np.float64:
+        sum_dBias = 0
+        deriv = 0
+        if (i+1) >= self.linear.__len__():
+            deriv = 1
         else:
-            a_deriv = 1 - self.relu[layer_index][features_out_index]
-            for i in range(self.linear[layer_index+1].features_out):
-                sum_deriv_weight += (self.output[label_index] - label) * self.linear[layer_index+1].dWeight[i][features_out_index] \
-                * self.linear[layer_index+1].weight[i][features_out_index]
-
-        return (self.output[label_index] - label) * sum_deriv_weight * a_deriv
-
+            deriv = 1 - self.a[i][j]
+        if (i+1) >= self.linear.__len__():
+            sum_dBias = 1
+        else:
+            for index in range(self.linear[i+1].features_out):
+                sum_dBias += (self.output[label_i]-label) * self.linear[i+1].dWeight[index][j]\
+                *self.linear[i+1].weight[index][j]
+        return (self.output[label_i]-label) * sum_dBias * deriv
 

@@ -250,7 +250,7 @@ class sequence:
             for i in reversed(range(self.linear.__len__())):
                 for j in range(self.linear[i].features_out):
                     for k in range(self.linear[i].features_in):
-                        self.linear[i].dWeight[j,k] = self.__dWeight(label=label,label_i=label_i,i=i,j=j,k=k)
+                        self.linear[i].dWeight[j,k] = self.__dWeight(label=label[label_i],label_i=label_i,i=i,j=j,k=k)
                         self.linear[i].weight[j,k] -= learning_rate * self.linear[i].dWeight[j,k]
 
                     self.linear[i].dBias[j] = self.__dBias(label=label,label_i=label_i,i=i,j=j)
@@ -272,9 +272,9 @@ class sequence:
             sum_dWeight = 1
         else:
             for index in range(self.linear[i+1].features_out):
-                sum_dWeight += (self.output[0]-label) * self.linear[i+1].dWeight[index][j] \
+                sum_dWeight += (self.output[label_i]-label) * self.linear[i+1].dWeight[index][j] \
                             * self.linear[i+1].weight[index][j]
-        return (self.output[0]-label) * sum_dWeight * deriv * input_features
+        return (self.output[label_i]-label) * sum_dWeight * deriv * input_features
     
     def __dBias(self, label, label_i, i, j) -> np.float64:
         sum_dBias = 0
@@ -287,7 +287,7 @@ class sequence:
             sum_dBias = 1
         else:
             for index in range(self.linear[i+1].features_out):
-                sum_dBias += (self.output[0]-label) * self.linear[i+1].dWeight[index][j]\
+                sum_dBias += (self.output[label_i]-label) * self.linear[i+1].dWeight[index][j]\
                 *self.linear[i+1].weight[index][j]
-        return (self.output[0]-label) * sum_dBias * deriv
+        return (self.output[label_i]-label) * sum_dBias * deriv
 
