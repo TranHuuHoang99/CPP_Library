@@ -2,5 +2,7 @@ from Module import (
     sequence,
     linear,
     relu,
-    Brain
+    Brain,
+    conv1d,
+    maxpooling1d
 )

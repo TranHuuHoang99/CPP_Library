@@ -8,6 +8,33 @@ class ModuleBase:
     def feedforward(self, features) -> np.ndarray:
         features = np.array(features, dtype=np.float64)
 
+class conv1d(ModuleBase):
+    def __init__(self, kernel_length = 3) -> None:
+        super().__init__()
+        self.kernel_length = kernel_length
+
+    def feedforward(self, features) -> np.ndarray:
+        super().feedforward(features)
+        temp = np.zeros([features.size - (self.kernel_length - 1)], dtype=np.float64)
+        for i in range(temp.size):
+            temp[i] = (features[i:(i+self.kernel_length)].sum()) / self.kernel_length
+        return temp
+
+class maxpooling1d(ModuleBase):
+    def __init__(self, kernel_length = 2) -> None:
+        super().__init__()
+        self.kernel_length = kernel_length
+
+    def feedforward(self, features) -> np.ndarray:
+        super().feedforward(features)
+        temp_length = (int(features.size/2)) if features.size % self.kernel_length == 0 else (int(features.size/2) + 1)
+        temp = np.zeros([temp_length], dtype=np.float64)
+        index = 0
+        for i in range(0,features.size,self.kernel_length):
+            temp[index] = max(features[i:(i+self.kernel_length)])
+            index += 1
+        return temp
+
 class conv3d(ModuleBase):
     def __init__(self, kernel_size = [0,0,0], padding = 0, strides = 0) -> None:
         super().__init__()
@@ -39,7 +66,7 @@ class conv3d(ModuleBase):
                 self.features[i,j] = sum
         return self.features
     
-class maxpooling(ModuleBase):
+class maxpooling3d(ModuleBase):
     def __init__(self, kernel_size = [0,0,0]) -> None:
         super().__init__()
         self.kernel_size = kernel_size
@@ -155,7 +182,6 @@ class Brain:
     def __init__(self) -> None:
         self.weight_linear = []
         self.bias_linear = []
-        self.prediction = 0
 
     def __loadparam(self, NeuralNetwork) -> sequence:
         index_reversed = 0
@@ -175,27 +201,11 @@ class Brain:
                 index -= 1
 
         return NeuralNetwork.model
-
-    def __none_minus(self, input) -> np.float64:
-        if input < 0:
-            return -input
-        return input
     
-    def __predict(self, input_features, NeuralNetwork):
+    def prediction_value(self, input_features, NeuralNetwork):
         nn:sequence = self.__loadparam(NeuralNetwork=NeuralNetwork)
         nn.forward_prop(input_features)
-        nn.output[0]
-        self.prediction = nn.output[0]
-
-        return 1 if nn.output[0] >= 0.6 else 0
-        
-    def predict(self, input_features, NeuralNetwork):
-        loss = self.__none_minus(self.prediction - self.__predict(input_features=input_features, NeuralNetwork=NeuralNetwork))
-        accuracy = 1 - loss
-        print("LABEL IS : %d"%(self.__predict(input_features=input_features, NeuralNetwork=NeuralNetwork)),
-                " accuracy is : %f"%(accuracy),
-                " loss is : %f"%(loss)      
-        )
+        return nn.output
     
 class sequence:
     def __init__(self, conv = [], fc = []) -> None:
@@ -253,7 +263,7 @@ class sequence:
                         self.linear[i].dWeight[j,k] = self.__dWeight(label=label[label_i],label_i=label_i,i=i,j=j,k=k)
                         self.linear[i].weight[j,k] -= learning_rate * self.linear[i].dWeight[j,k]
 
-                    self.linear[i].dBias[j] = self.__dBias(label=label,label_i=label_i,i=i,j=j)
+                    self.linear[i].dBias[j] = self.__dBias(label=label[label_i],label_i=label_i,i=i,j=j)
                     self.linear[i].bias[j] -= learning_rate * self.linear[i].dBias[j]
 
     def __dWeight(self, label, label_i, i, j, k) ->np.float64:
