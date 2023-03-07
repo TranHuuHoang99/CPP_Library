@@ -1,5 +1,5 @@
 from lib import *
-from model import SeekerNN
+from model import SeekerNN, XORNN
 
 LABEL = 'Category'
 DATA = 'Message'
@@ -18,7 +18,7 @@ def make_data(data_path):
     sum_ascii = 0
     get_word_total_ascii_int = []
     split_word = []
-    for i in range(int(excel_file[LABEL].__len__())):
+    for i in range(int(excel_file[LABEL].__len__() / 2)):
         label_arr.append(excel_file[LABEL][i])
         split_word = []
         split_word = excel_file[DATA][i].split()
@@ -59,7 +59,7 @@ def cal_loss(pred, label):
         avg_pred += (relu((pred[i] - label[i])))
     return avg_pred / label.__len__()
 
-if __name__ == "__main__":
+def seeker_fit():
     model = SeekerNN()
     root_path = os.path.abspath(os.path.dirname(__file__))
     root_brain = root_path + '\\seeker_nn.brain'
@@ -78,3 +78,41 @@ if __name__ == "__main__":
     # print(data[0][159])
     # predict = pickle.load(open(root_brain, "rb"))
     # print(predict.prediction_value(data[1][159], model))
+
+def atttach_lable(arr) -> np.float64:
+    if arr[0] == 0 and arr[1] == 1:
+        return [1]
+    elif arr[0] == 0 and arr[1] == 0:
+        return [0]
+    elif arr[0] == 1 and arr[1] == 1:
+        return [0]
+    else:
+        return [1]
+
+def none_minus(input) -> np.float64:
+        if input < 0:
+            return -input
+        return input
+
+def xor_fit():
+    model = XORNN()
+    root_path = os.path.abspath(os.path.dirname(__file__))
+    root_brain = root_path + '\\xornn.brain'
+    for i in range(100000):
+        arr = [np.float64(rand.randint(0,1)), np.float64(rand.randint(0,1))]
+        model.model.forward_prop(arr)
+        print("INPUT : ", arr[0], " ", arr[1], " LABEL IS: ", atttach_lable(arr=arr))
+        print("accuracy : ", 1 - (none_minus(atttach_lable(arr=arr) - model.model.output[0])), " loss : ", (none_minus(atttach_lable(arr=arr) - model.model.output[0])))
+        print()
+        model.model.backward_prop(0.1, atttach_lable(arr=arr))
+
+    model.save("XOR_NN.brain")
+
+    print("\n")
+
+    predict = pickle.load(open(root_brain, "rb"))
+    predict.prediction_value([1,1], NeuralNetwork=model)
+    
+
+if __name__ == "__main__":
+    xor_fit()
