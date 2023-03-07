@@ -65,13 +65,13 @@ def seeker_fit():
     root_brain = root_path + '\\seeker_nn.brain'
     root_excel_path = root_path + '\\raw_data\spam_text.csv'
     data = make_data(root_excel_path)
-    learning_rate = 0.1
+    learning_rate = 0.01
 
     for i in range(data[2]):
-        print("===================================== EPOCH : %d, LABEL : %a, %s ====================================="%(i,make_lable(data[0][i]), data[0][i]))
+        print("EPOCH : %d, LABEL : %a, %s"%(i,make_lable(data[0][i]), data[0][i]))
         model.model.forward_prop(data[1][i])
         loss = cal_loss(pred=model.model.output, label=make_lable(data[0][i]))
-        print("accuracy : ", 1-loss, ", loss : ", loss)
+        print("loss : ", loss)
         model.model.backward_prop(learning_rate=learning_rate, label=make_lable(data[0][i]))
 
     model.save(root_brain)
@@ -102,7 +102,7 @@ def xor_fit():
         arr = [np.float64(rand.randint(0,1)), np.float64(rand.randint(0,1))]
         model.model.forward_prop(arr)
         print("INPUT : ", arr[0], " ", arr[1], " LABEL IS: ", atttach_lable(arr=arr))
-        print("accuracy : ", 1 - (none_minus(atttach_lable(arr=arr) - model.model.output[0])), " loss : ", (none_minus(atttach_lable(arr=arr) - model.model.output[0])))
+        print("accuracy : ", 1 - (none_minus(atttach_lable(arr=arr) - model.model.output[0])), "loss : ", (none_minus(atttach_lable(arr=arr) - model.model.output[0])))
         print()
         model.model.backward_prop(0.1, atttach_lable(arr=arr))
 
@@ -115,4 +115,5 @@ def xor_fit():
     
 
 if __name__ == "__main__":
-    xor_fit()
+    # xor_fit()
+    seeker_fit()

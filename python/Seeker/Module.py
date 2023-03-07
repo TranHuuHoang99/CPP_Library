@@ -256,20 +256,25 @@ class sequence:
                     pass
 
     def backward_prop(self, learning_rate, label):
-        for label_i in range(label.__len__()):
-            for i in reversed(range(self.linear.__len__())):
-                for j in range(self.linear[i].features_out):
-                    for k in range(self.linear[i].features_in):
-                        self.linear[i].dWeight[j,k] = self.__dWeight(label=label[label_i],label_i=label_i,i=i,j=j,k=k)
-                        self.linear[i].weight[j,k] -= learning_rate * self.linear[i].dWeight[j,k]
+        for i in reversed(range(self.linear.__len__())):
+            for j in range(self.linear[i].features_out):
+                for k in range(self.linear[i].features_in):
+                    self.linear[i].dWeight[j,k] = self.__dWeight(label=label,i=i,j=j,k=k)
+                    self.linear[i].weight[j,k] -= learning_rate * self.linear[i].dWeight[j,k]
 
-                    self.linear[i].dBias[j] = self.__dBias(label=label[label_i],label_i=label_i,i=i,j=j)
-                    self.linear[i].bias[j] -= learning_rate * self.linear[i].dBias[j]
+                self.linear[i].dBias[j] = self.__dBias(label=label,i=i,j=j)
+                self.linear[i].bias[j] -= learning_rate * self.linear[i].dBias[j]
 
-    def __dWeight(self, label, label_i, i, j, k) ->np.float64:
+    def __dWeight(self, label, i, j, k) ->np.float64:
         sum_dWeight = 0
         deriv = 0
         input_features = 0
+        loss = 0
+
+        for lab_i in range(label.__len__()):
+            loss += self.output[lab_i] - label[lab_i]
+        loss /= label.__len__()
+
         if (i+1) >= self.linear.__len__():
             deriv = 1
         else:
@@ -282,13 +287,19 @@ class sequence:
             sum_dWeight = 1
         else:
             for index in range(self.linear[i+1].features_out):
-                sum_dWeight += (self.output[label_i]-label) * self.linear[i+1].dWeight[index][j] \
-                            * self.linear[i+1].weight[index][j]
-        return (self.output[label_i]-label) * sum_dWeight * deriv * input_features
+                sum_dWeight += loss * self.linear[i+1].dWeight[index][j] \
+                            * self.linear[i+1].weight[index][j]  
+        return loss * sum_dWeight * deriv * input_features
     
-    def __dBias(self, label, label_i, i, j) -> np.float64:
+    def __dBias(self, label, i, j) -> np.float64:
         sum_dBias = 0
         deriv = 0
+        loss = 0
+
+        for lab_i in range(label.__len__()):
+            loss += self.output[lab_i] - label[lab_i]
+        loss /= label.__len__()
+
         if (i+1) >= self.linear.__len__():
             deriv = 1
         else:
@@ -297,7 +308,7 @@ class sequence:
             sum_dBias = 1
         else:
             for index in range(self.linear[i+1].features_out):
-                sum_dBias += (self.output[label_i]-label) * self.linear[i+1].dWeight[index][j]\
+                sum_dBias += loss * self.linear[i+1].dWeight[index][j]\
                 *self.linear[i+1].weight[index][j]
-        return (self.output[label_i]-label) * sum_dBias * deriv
+        return loss * sum_dBias * deriv
 

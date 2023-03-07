@@ -10,24 +10,24 @@ class SeekerNN:
             conv=[
                 nn.conv1d(kernel_length=3),
                 nn.conv1d(kernel_length=3),
-                nn.maxpooling1d(kernel_length=2),
+                # nn.maxpooling1d(kernel_length=2),
                 
                 nn.conv1d(kernel_length=3),
                 nn.conv1d(kernel_length=3),
-                nn.maxpooling1d(kernel_length=2),
+                # nn.maxpooling1d(kernel_length=2),
 
                 nn.conv1d(kernel_length=3),
                 nn.conv1d(kernel_length=3),
-                nn.maxpooling1d(kernel_length=2)
+                # nn.maxpooling1d(kernel_length=2)
             ],
             fc= [
-                nn.linear(features_in=111, features_out=55),
+                nn.linear(features_in=449, features_out=224),
                 nn.relu(),
 
-                nn.linear(features_in=55, features_out=25),
+                nn.linear(features_in=224, features_out=112),
                 nn.relu(),
 
-                nn.linear(features_in=25, features_out=2),
+                nn.linear(features_in=112, features_out=2),
                 nn.relu()
             ]
         )
