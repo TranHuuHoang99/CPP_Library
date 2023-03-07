@@ -254,6 +254,8 @@ class sequence:
                     self.a.append(self.output)
                 else:
                     pass
+        avg_output = self.output.sum()
+        self.output = self.output / avg_output
 
     def backward_prop(self, learning_rate, label):
         for label_i in range(label.__len__()):
