@@ -4,30 +4,34 @@ import helper as nn
 # model for seeker
 class SeekerNN:
     def __init__(self) -> None:
-        rand.seed(1234)
+        rand.seed(2)
         self.brain = nn.Brain()
         self.model = nn.sequence(
             conv=[
                 nn.conv1d(kernel_length=3),
                 nn.conv1d(kernel_length=3),
-                # nn.maxpooling1d(kernel_length=2),
+                nn.maxpooling1d(kernel_length=2),
                 
                 nn.conv1d(kernel_length=3),
                 nn.conv1d(kernel_length=3),
-                # nn.maxpooling1d(kernel_length=2),
+                nn.maxpooling1d(kernel_length=2),
 
                 nn.conv1d(kernel_length=3),
                 nn.conv1d(kernel_length=3),
-                # nn.maxpooling1d(kernel_length=2)
+                nn.maxpooling1d(kernel_length=2),
+
+                nn.conv1d(kernel_length=3),
+                nn.conv1d(kernel_length=3),
+                nn.maxpooling1d(kernel_length=2)
             ],
             fc= [
-                nn.linear(features_in=449, features_out=224),
+                nn.linear(features_in=54, features_out=120),
                 nn.relu(),
 
-                nn.linear(features_in=224, features_out=112),
+                nn.linear(features_in=120, features_out=240),
                 nn.relu(),
 
-                nn.linear(features_in=112, features_out=2),
+                nn.linear(features_in=240, features_out=2),
                 nn.relu()
             ]
         )
@@ -42,14 +46,17 @@ class SeekerNN:
 
 class XORNN:
     def __init__(self) -> None:
-        rand.seed(1234)
+        rand.seed(2)
         self.brain = nn.Brain()
         self.model = nn.sequence(
             fc= [
-                nn.linear(features_in=2, features_out=2),
+                nn.linear(features_in=2, features_out=16),
                 nn.relu(),
 
-                nn.linear(features_in=2, features_out=1),
+                nn.linear(features_in=16, features_out=32),
+                nn.relu(),
+
+                nn.linear(features_in=32, features_out=1),
                 nn.relu()
             ]
         )

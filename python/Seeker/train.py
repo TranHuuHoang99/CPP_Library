@@ -18,7 +18,7 @@ def make_data(data_path):
     sum_ascii = 0
     get_word_total_ascii_int = []
     split_word = []
-    for i in range(int(excel_file[LABEL].__len__() / 2)):
+    for i in range(int(excel_file[LABEL].__len__())):
         label_arr.append(excel_file[LABEL][i])
         split_word = []
         split_word = excel_file[DATA][i].split()
@@ -35,7 +35,7 @@ def make_data(data_path):
             data_arr[i][:] = data_arr[i][: (data_arr[i].__len__() - (data_arr[i].__len__() - 100))]
         elif data_arr[i].__len__() < 910:
             for new in range(int(910) - int(data_arr[i].__len__())):
-                data_arr[i].append(int(0))
+                data_arr[i].append(int(32)) #32 equal to " " (space)
         else:
             pass
     
@@ -65,19 +65,19 @@ def seeker_fit():
     root_brain = root_path + '\\seeker_nn.brain'
     root_excel_path = root_path + '\\raw_data\spam_text.csv'
     data = make_data(root_excel_path)
-    learning_rate = 0.01
+    learning_rate = 0.4
 
     for i in range(data[2]):
-        print("EPOCH : %d, LABEL : %a, %s"%(i,make_lable(data[0][i]), data[0][i]))
+        print("LABEL : %a, %s"%(make_lable(data[0][i]), data[0][i]))
         model.model.forward_prop(data[1][i])
         loss = cal_loss(pred=model.model.output, label=make_lable(data[0][i]))
         print("loss : ", loss)
         model.model.backward_prop(learning_rate=learning_rate, label=make_lable(data[0][i]))
 
     model.save(root_brain)
-    # print(data[0][159])
-    # predict = pickle.load(open(root_brain, "rb"))
-    # print(predict.prediction_value(data[1][159], model))
+    print(data[0][159])
+    predict = pickle.load(open(root_brain, "rb"))
+    print(predict.prediction_value(data[1][159], model))
 
 def atttach_lable(arr) -> np.float64:
     if arr[0] == 0 and arr[1] == 1:
@@ -98,20 +98,21 @@ def xor_fit():
     model = XORNN()
     root_path = os.path.abspath(os.path.dirname(__file__))
     root_brain = root_path + '\\xornn.brain'
+    
     for i in range(100000):
         arr = [np.float64(rand.randint(0,1)), np.float64(rand.randint(0,1))]
         model.model.forward_prop(arr)
         print("INPUT : ", arr[0], " ", arr[1], " LABEL IS: ", atttach_lable(arr=arr))
         print("accuracy : ", 1 - (none_minus(atttach_lable(arr=arr) - model.model.output[0])), "loss : ", (none_minus(atttach_lable(arr=arr) - model.model.output[0])))
         print()
-        model.model.backward_prop(0.1, atttach_lable(arr=arr))
+        model.model.backward_prop(0.4, atttach_lable(arr=arr))
 
-    model.save("XOR_NN.brain")
+    model.save(root_brain)
 
     print("\n")
 
     predict = pickle.load(open(root_brain, "rb"))
-    predict.prediction_value([1,1], NeuralNetwork=model)
+    print(predict.prediction_value([0,0], NeuralNetwork=model))
     
 
 if __name__ == "__main__":
