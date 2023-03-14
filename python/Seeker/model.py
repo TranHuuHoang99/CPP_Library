@@ -20,20 +20,11 @@ class SeekerNN:
         self.model.add(conv1d(kernel_length=3))
         self.model.add(maxpooling1d(kernel_length=2))
 
-        self.model.add(linear(features_in=111, features_out=50))
-        self.model.add(relu(features_in=50))
+        self.model.add(linear(features_in=18, features_out=36))
+        self.model.add(relu(features_in=36))
 
-        self.model.add(linear(features_in=50, features_out=25))
-        self.model.add(relu(25))
-
-        self.model.add(linear(features_in=25, features_out=12))
-        self.model.add(relu(12))
-
-        self.model.add(linear(features_in=12, features_out=4))
-        self.model.add(relu(4))
-
-        self.model.add(linear(features_in=4, features_out=2))
-        self.model.add(relu(features_in=2))
+        self.model.add(linear(features_in=36, features_out=2))
+        self.model.add(relu(2))
 
     def save(self, path):
         self.model.save_model(path)
