@@ -6,7 +6,7 @@ class SeekerNN:
     def __init__(self) -> None:
         rand.seed(2)
         self.model = sequence(seed=1234)
-        self.model.learning_rate = 0.1
+        self.model.learning_rate = 0.3
 
         self.model.add(conv1d(kernel_length=3))
         self.model.add(conv1d(kernel_length=3))

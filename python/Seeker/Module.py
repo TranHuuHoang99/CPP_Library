@@ -32,7 +32,7 @@ class maxpooling1d(Layer):
         temp = np.zeros([temp_length], dtype=np.float64)
         index = 0
         for i in range(0,features.size,self.kernel_length):
-            temp[index] = max(features[i:(i+self.kernel_length)])
+            temp[index] = features[i:(i+self.kernel_length)].sum() / self.kernel_length
             index += 1
         return temp
 

@@ -3,7 +3,7 @@ from lib import *
 DATA = 'Message'
 LABEL = 'Category'
 SPEC_CHAR = "`~!@#$%^&*()-_=+[]{\}|;:''"",<.>/?"
-MAXIMUM_ASCII = 256
+MAXIMUM_ASCII = 122
 
 data = []
 label = []
@@ -47,7 +47,7 @@ def to_ascii(raw_data, raw_label):
             sum_of_ascii = 0
             for word in data_sp[i][j]:
                 sum_of_ascii += ord(word) / MAXIMUM_ASCII
-            data_ascii.append(sum_of_ascii)
+            data_ascii.append(sum_of_ascii / data_sp[i][j].__len__())
         data.append(data_ascii)
 
     for i in range(raw_label.__len__()):
