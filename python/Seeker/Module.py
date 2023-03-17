@@ -13,7 +13,7 @@ class conv1d(Layer):
         super().__init__()
         self.kernel_length = kernel_length
 
-    def feedforward(self, features) -> np.ndarray:
+    def feedforward(self, features):
         super().feedforward(features)
         features = features / features.size
         temp = np.zeros([features.size - (self.kernel_length - 1)], dtype=np.float64)
@@ -26,13 +26,16 @@ class maxpooling1d(Layer):
         super().__init__()
         self.kernel_length = kernel_length
 
-    def feedforward(self, features) -> np.ndarray:
+    def feedforward(self, features):
         super().feedforward(features)
         temp_length = (int(features.size/2)) if features.size % self.kernel_length == 0 else (int(features.size/2) + 1)
         temp = np.zeros([temp_length], dtype=np.float64)
         index = 0
         for i in range(0,features.size,self.kernel_length):
-            temp[index] = features[i:(i+self.kernel_length)].sum() / self.kernel_length
+            if i + self.kernel_length >= features.size:
+                temp[index] = features[i] / self.kernel_length
+            else:
+                temp[index] = features[i:(i+self.kernel_length)].sum() / self.kernel_length
             index += 1
         return temp
 

@@ -25,6 +25,11 @@ def fit(model: SeekerNN, path):
             if (i/label.size) >= (count/50):
                 print("#", sep= ' ', end='', flush=True)
                 count += 1
+        validation_rand = rand.randint(0,label.shape[0] - 1)
+        model.model.forward_prop(features=data[validation_rand], label=label[validation_rand])
+        model.model.backward_prop(label=label[validation_rand])
+        model.model.gradient_descend()
+        print(" LABEL IS : ", label[validation_rand])
         print(" LOSS IS : ", model.model.loss, " PRED IS : ", model.model.features)
     model.save(path=path)
 
@@ -40,5 +45,5 @@ if __name__ == "__main__":
     root_path = os.path.abspath(os.path.dirname(__file__))
     root_bin_file = root_path + '\\seeker.brain'
     model = SeekerNN()
-    fit(model=model, path=root_bin_file)
+    # fit(model=model, path=root_bin_file)
     predict()

@@ -28,11 +28,9 @@ def make_raw_data():
 
 def attach_label(name):
     if name == "spam":
-        return [0,1]
+        return [0,0]
     elif name == "ham":
-        return [1,0]
-    else:
-        pass
+        return [0,1]
     
 def to_ascii(raw_data, raw_label):
     data_sp = []
