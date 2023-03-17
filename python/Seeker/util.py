@@ -28,9 +28,9 @@ def make_raw_data():
 
 def attach_label(name):
     if name == "spam":
-        return [0,0]
-    elif name == "ham":
         return [0,1]
+    elif name == "ham":
+        return [1,0]
     else:
         pass
     

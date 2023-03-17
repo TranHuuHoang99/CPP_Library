@@ -14,10 +14,9 @@ for i in range(data.__len__()):
 
 data = np.array(data, dtype=np.float64)
     
-
 def fit(model: SeekerNN, path):
     count = 0
-    for epoch in range(50):
+    for epoch in range(10):
         count = 0
         for i in range(label.shape[0]):
             model.model.forward_prop(features=data[i], label=label[i])
@@ -35,11 +34,11 @@ def predict():
     model = SeekerNN()
     brain:Brain = pickle.load(open(root_brain_file, "rb"))
     brain.set_model(model=model.model)
-    brain.predict(features=data[159], label=label[159])
+    brain.predict(features=data[161], label=label[161])
 
 if __name__ == "__main__":
     root_path = os.path.abspath(os.path.dirname(__file__))
     root_bin_file = root_path + '\\seeker.brain'
     model = SeekerNN()
-    # fit(model=model, path=root_bin_file)
+    fit(model=model, path=root_bin_file)
     predict()
