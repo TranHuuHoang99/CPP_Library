@@ -41,9 +41,25 @@ def predict():
     brain.set_model(model=model.model)
     brain.predict(features=data[161], label=label[161])
 
+def predict_spam_only():
+    spam_data_index = []
+    for i in range(label.shape[0]):
+        if label[i][0] == 0 and label[i][1] == 0 and spam_data_index.__len__() < 10:
+            spam_data_index.append(i)
+
+    root_path = os.path.abspath(os.path.dirname(__file__))
+    root_brain_file = root_path + '\\seeker.brain'
+    model = SeekerNN()
+    brain:Brain = pickle.load(open(root_brain_file, "rb"))
+    brain.set_model(model=model.model)
+    for index in spam_data_index:
+        brain.predict(features=data[index], label=label[index])
+
 if __name__ == "__main__":
     root_path = os.path.abspath(os.path.dirname(__file__))
     root_bin_file = root_path + '\\seeker.brain'
     model = SeekerNN()
     # fit(model=model, path=root_bin_file)
-    predict()
+    # predict()
+    predict_spam_only()
+    
