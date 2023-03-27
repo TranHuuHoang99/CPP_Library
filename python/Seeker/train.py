@@ -59,7 +59,7 @@ if __name__ == "__main__":
     root_path = os.path.abspath(os.path.dirname(__file__))
     root_bin_file = root_path + '\\seeker.brain'
     model = SeekerNN()
-    # fit(model=model, path=root_bin_file)
+    fit(model=model, path=root_bin_file)
     # predict()
-    predict_spam_only()
+    # predict_spam_only()
     
