@@ -1,5 +1,26 @@
 from lib import *
 
+class Brain:
+    def __init__(self) -> None:
+        self.weight = []
+        self.bias = []
+        self.model:sequence = ...
+
+    def set_model(self, model):
+        self.model = model
+
+    def __load_params(self):
+        for i in range(self.model.linear.__len__()):
+            self.model.linear[i].weight = self.weight[i]
+            self.model.linear[i].bias = self.bias[i]
+
+    def predict(self, features, label):
+        self.__load_params()
+        label = np.array(label, dtype=np.uint8)
+        self.model.forward_prop(features, label=label)
+
+        print("PREDICTION IS : ", self.model.features, " LABEL IS : ", label, " LOSS IS : ", self.model.loss)
+
 class Layer:
     def __init__(self) -> None:
         self.name = self.__class__.__name__
@@ -54,6 +75,7 @@ class sequence:
         self.loss = 0
         self.learning_rate = 0.1
         np.random.seed(seed=seed)
+        self.brain = Brain()
 
     def add(self, layer):
         self.layers.append(layer)
@@ -63,6 +85,14 @@ class sequence:
             self.softmax = layer
         else:
             pass
+
+    def save_model(self, path):
+        self.brain.weight = []
+        self.brain.bias = []
+        for i in range(self.linear.__len__()):
+            self.brain.weight.append(self.linear[i].weight)
+            self.brain.bias.append(self.linear[i].bias)
+        pickle.dump(self.brain, open(path, "wb"))
 
     def __none_minus(self, input):
         if input < 0:
@@ -106,16 +136,16 @@ class sequence:
         updated = 0
         if (i+1) >= self.linear.__len__():
             updated = (self.features[j] - label[j]) * self.__dSoftmax(self.softmax.E[j]) * \
-            self.__dRelu(self.linear[i-1].Z[k]) * self.linear[i-1].Z[k]
+            self.__dRelu(self.linear[i].Z[j]) * self.linear[i-1].Z[k]
             return updated
         
         for index in range(self.linear[i+1].features_out):
             if (i-1) < 0:
                 updated += self.linear[i+1].dWeight[index][j] * self.linear[i+1].weight[index][j] * \
-                self.linear[i].sample_in[k]
+                self.__dRelu(self.linear[i].Z[j]) * self.linear[i].sample_in[k]
             else:
                 updated += self.linear[i+1].dWeight[index][j] * self.linear[i+1].weight[index][j] * \
-                self.linear[i-1].Z[k]
+                self.__dRelu(self.linear[i].Z[j]) * self.linear[i-1].Z[k]
         return updated
     
     def __dBias(self, i, j, label):
