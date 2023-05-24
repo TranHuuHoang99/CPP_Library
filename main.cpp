@@ -10,5 +10,3 @@ int main(void) {
     return 0;
 
 }
-
-//hoangprodn 123
