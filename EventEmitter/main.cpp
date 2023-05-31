@@ -1,21 +1,13 @@
 #include <iostream>
 #include "EventEmitter.hpp"
+#include "Test_Module.hpp"
 
 using namespace std;
 
 int main(void) {
-    int localValue = 1999;
 
-    auto callback = [&](int value) {
-        localValue = value;
-    };
+    Test_Module _test;
 
-    EventEmitter::inst()->on<int>("hoangprodn", Lambda<int>::lambda_cast(callback));
-
-    cout << localValue << endl;
-
-    EventEmitter::inst()->emit<int>("hoangprodn", 1234);
- 
-    cout << localValue << endl;
+    EventEmitter::inst()->emit<int>("hoangprodn",_test.age, 1999);
     return 0;
 }

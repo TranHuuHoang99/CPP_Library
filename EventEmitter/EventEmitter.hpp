@@ -4,18 +4,10 @@
 #include <iostream>
 #include <stdint.h>
 #include <vector>
-#include <functional>
+#include <string.h>
 
-template<typename... T> using Function = std::function<void(T...)>;
-template<typename... T> std::function<void(T...)> local_callback;
+using namespace std;
 
-template<typename... T>
-struct Lambda {
-    template<typename FunctionType>
-    static Function<T...> lambda_cast(FunctionType& _function) {
-        return static_cast<Function<T...>>(_function);
-    }
-};
 
 class EventEmitter {
     public: 
@@ -25,6 +17,7 @@ class EventEmitter {
     private:
         EventEmitter(EventEmitter const&) = delete;
         void operator =(EventEmitter const&) = delete;
+        template<typename... T> using function = void(*)(T...);
 
     private:
         static EventEmitter *_inst;
@@ -38,18 +31,15 @@ class EventEmitter {
         };
 
         std::vector<Events> _eventRegister;
-
-        void* holder;
+        void *holder;
         
     public:
         static EventEmitter *inst(void);
-        
+
         template<typename... T>
-        uint8_t on(const char* eventName, std::function<void(T...)> callback) {
-            local_callback<T...> = callback;
-
-            holder = &local_callback<T...>;
-
+        uint8_t on(const char* eventName, void(*callback)(T...)) {
+            holder = (void*)callback;
+            
             if(_eventRegister.size() != 0) {
                 for(uint8_t i = 0; i < _eventRegister.size(); i++) {
                     if(_eventRegister[i].eventName == eventName) {
@@ -67,18 +57,19 @@ class EventEmitter {
             _events.eventName = eventName;
             _events._registry._register.push_back(holder);
             _eventRegister.push_back(_events);
+
             return 0;
         }
         
         template<typename... T>
         void emit(const char* eventName, T... params) {
-            Function<T...>* callback = (Function<T...>*)(holder);
-            
+            void(*callback)(T...);
+
             for(uint8_t i = 0; i < _eventRegister.size(); i++) {
-                if(_eventRegister[i].eventName == eventName) {
+                if(strcmp(_eventRegister[i].eventName, eventName) == 0) {
                     for(uint8_t j = 0; j < _eventRegister[i]._registry._register.size(); j++) {
-                        callback = (Function<T...>*)(_eventRegister[i]._registry._register[j]);
-                        (*callback)(params...);
+                        callback = (void(*)(T...))_eventRegister[i]._registry._register[j];
+                        callback(params...);
                     }
                 }
             }
@@ -88,6 +79,6 @@ class EventEmitter {
 
         void dismiss(const char* eventName);
 
-};
+}; //EventEmitter
 
 #endif //EVENT_EMITTER_HPP_
