@@ -11,6 +11,3 @@ int main(void) {
     EventEmitter::inst()->emit<int>("hoangprodn",_test.age, 1999);
     return 0;
 }
-
-
-//hoangprodn
