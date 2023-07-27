@@ -1,12 +1,20 @@
 #include <iostream>
-#include <stdint.h>
-#include <fstream>
+// #include "MergeSort.hpp"
+#include "XorSort.hpp"
+// #include "CmpString.hpp"
+
+using namespace std;
 
 int main(void) {
-    int a = (int)false;
+    // MergeSort _mergeSort;
 
-    std::cout << a << std::endl;
+    // _mergeSort.mainFunction();
+
+    XorSort _xorSort;
+    _xorSort.mainFunction();
+
+    // CmpString _cmpString;
+    // _cmpString.mainFunction();
 
     return 0;
-
 }
